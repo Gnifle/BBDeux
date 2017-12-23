@@ -1,0 +1,20 @@
+# IntelliJ
+/.idea
+/*.iml
+/.phpstorm_helpers/
+
+/laradock/
+/_ide_helper.php
+/_ide_helper_models.php
+
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.env
