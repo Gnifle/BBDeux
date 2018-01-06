@@ -2,6 +2,7 @@
 
 use Faker\Generator as Faker;
 use App\Models\Weapon;
+use App\Models\Availability;
 use App\Models\CharacterClass;
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */

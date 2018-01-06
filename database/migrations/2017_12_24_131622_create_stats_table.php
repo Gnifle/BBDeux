@@ -6,11 +6,6 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateStatsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('stats', function (Blueprint $table) {
@@ -18,17 +13,12 @@ class CreateStatsTable extends Migration
             $table->integer('statable_id');
             $table->string('statable_type');
             $table->string('title');
-            $table->string('value');
-            $table->string('unit');
+            $table->string('value')->nullable();
+            $table->string('unit')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('stats');

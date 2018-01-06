@@ -52,10 +52,10 @@ class CharacterClassTest extends Testcase
 
     public function testACharacterClassCanHaveNoStats()
     {
-        /** @var Weapon $weapon */
-        $weapon = factory(Weapon::class)->create();
+        /** @var CharacterClass $class */
+        $class = factory(CharacterClass::class)->create();
 
-        $this->assertEmpty($weapon->stats);
+        $this->assertEmpty($class->stats);
     }
 
     public function statCountProvider()
