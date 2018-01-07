@@ -21,14 +21,12 @@ $factory->state(Availability::class, 'indefinite', function () {
     ];
 });
 
-$factory->state(Availability::class, 'weapon', function (Faker $faker) {
+$factory->state(Availability::class, 'weapon', function () {
     /** @var Weapon $weapon */
     $weapon = factory(Weapon::class)->create();
 
     return [
         'availability_id' => $weapon->id,
-        'availability_type' => get_class($weapon),
-        'from' => Carbon::now()->startOfMonth(),
-        'to' => Carbon::now()->endOfMonth(),
+        'availability_type' => 'weapon',
     ];
 });

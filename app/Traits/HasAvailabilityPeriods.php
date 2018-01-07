@@ -46,8 +46,18 @@ trait HasAvailabilityPeriods
     {
         $when = $when ?: Carbon::now();
 
+//        dd(
+//            $query->join('availabilities', 'availabilities.availability_id', '=', "{$this->getTable()}.{$this->getKeyName()}")
+//                ->where(function (Builder $query) use ($when) {
+//                    return $query->whereNotNull('to')
+//                        ->where('from', '<=', $when);
+//                        ->where('to', '>=', $when);
+//                })
+//                ->get()
+//        );
+
         return $query->has('availability')
-            ->join('availabilities', 'availabilities.availability_id', '=', 'weapons.id')
+            ->join('availabilities', 'availabilities.availability_id', '=', "{$this->getTable()}.{$this->getKeyName()}")
             ->where(function (Builder $query) use ($when) {
                 return $query->whereNull('to')
                     ->where('from', '<=', Carbon::now());

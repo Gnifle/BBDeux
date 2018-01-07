@@ -7,11 +7,14 @@ use App\Models\Currency;
 use App\Models\Price;
 use App\Models\Stat;
 use App\Models\Weapon;
+use App\Traits\Tests\ProvidesPeriods;
 use Carbon\Carbon;
 use Tests\TestCase;
 
 class WeaponTest extends TestCase
 {
+    use ProvidesPeriods;
+
     protected function setUp()
     {
         parent::setUp();
@@ -76,7 +79,7 @@ class WeaponTest extends TestCase
         /** @var Weapon $weapon */
         $weapon = factory(Weapon::class)->create();
 
-        Availability::create([
+        factory(Availability::class)->create([
             'availability_id' => $weapon->id,
             'availability_type' => 'weapon',
             'from' => Carbon::create(2017, 11, 1, 0, 0, 0),
@@ -107,7 +110,7 @@ class WeaponTest extends TestCase
         /** @var Weapon $weapon */
         $weapon = factory(Weapon::class)->create();
 
-        Availability::create([
+        factory(Availability::class)->create([
             'availability_id' => $weapon->id,
             'availability_type' => 'weapon',
             'from' => Carbon::create(2017, 11, 1, 0, 0, 0),
@@ -124,7 +127,7 @@ class WeaponTest extends TestCase
         /** @var Weapon $weapon */
         $weapon = factory(Weapon::class)->create();
 
-        Availability::create([
+        factory(Availability::class)->create([
             'availability_id' => $weapon->id,
             'availability_type' => 'weapon',
             'from' => Carbon::create(2017, 11, 1, 0, 0, 0),
@@ -141,7 +144,7 @@ class WeaponTest extends TestCase
         /** @var Weapon $weapon */
         $weapon = factory(Weapon::class)->create();
 
-        Availability::create([
+        factory(Availability::class)->create([
             'availability_id' => $weapon->id,
             'availability_type' => 'weapon',
             'from' => Carbon::create(2017, 11, 1, 0, 0, 0),
@@ -167,7 +170,7 @@ class WeaponTest extends TestCase
      */
     public function testAvailabilityScope(int $expected_count, Carbon $when = null)
     {
-        factory(Availability::class)->states('weapon')->create();
+        factory(Availability::class)->states('weapon')->create(static::activePeriodMonth());
         factory(Weapon::class)->create();
 
         $this->assertCount(2, Weapon::all());
@@ -175,28 +178,30 @@ class WeaponTest extends TestCase
         $this->assertEquals($expected_count, Weapon::available($when)->count());
     }
 
-    public function testAWeaponCanHaveMultiplePrices()
+    public function testAWeaponCanHaveAFreePrice()
     {
-        /** @var Price $price */
-        $price = factory(Price::class)->create();
-        /** @var Price $price2 */
-        $price2 = factory(Price::class)->create();
-
         /** @var Weapon $weapon */
         $weapon = factory(Weapon::class)->create();
 
-        $weapon->prices()->attach($price, [
-            'from' => Carbon::now()->subMonth()->startOfMonth(),
-            'to' => Carbon::now()->addMonth()->endOfMonth(),
+        factory(Price::class)->states('free')->create([
+            'priceable_id' => $weapon->id,
+            'priceable_type' => 'weapon',
+        ] + static::activePeriodMonth());
+
+        $this->assertTrue($weapon->is_free);
+    }
+
+    public function testAWeaponCanHaveANonFreePrice()
+    {
+        /** @var Weapon $weapon */
+        $weapon = factory(Weapon::class)->create();
+
+        factory(Price::class)->create([
+            'priceable_id' => $weapon->id,
+            'priceable_type' => 'weapon',
         ]);
 
-        $weapon->prices()->attach($price2, [
-            'from' => Carbon::now()->subMonth()->startOfMonth(),
-            'to' => Carbon::now()->subMonth()->endOfMonth(),
-        ]);
-
-        dd($weapon->prices);
-        dd($weapon->current_price->currency->name, $weapon->current_price->amount);
+        $this->assertFalse($weapon->is_free);
     }
 
     protected function tearDown()

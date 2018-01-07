@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $updated_at
  *
  * Dynamic Properties:
- * @property-read Price $price
+ * @property-read Price $price @see App\Traits\HasPrices
+ * @property-read bool $is_free @see App\Traits\HasPrices
  *
  * Relationships:
  * @property-read CharacterClass $class
