@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Abstracts\BBDeuxModel;
+use App\Contracts\Available;
 use App\Traits\HasAvailabilityPeriods;
 use App\Traits\HasPrices;
 use App\Traits\HasStats;

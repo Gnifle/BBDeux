@@ -28,5 +28,9 @@ class AppServiceProvider extends ServiceProvider
                 class_exists($value) && is_a(new $value, 'App\Models\\' . $parameters[0], true) :
                 class_exists($value) && new $value instanceof Model;
         });
+
+        Validator::extendImplicit('interface', function ($attribute, $value, $parameters, $validator) {
+            return $parameters ? is_a(new $value, 'App\Contracts\\' . $parameters[0], true) : false;
+        }, 'Given model does not implement given interface');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Abstracts\BBDeuxModel;
+use App\Contracts\Periodable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
@@ -35,7 +36,7 @@ class Availability extends BBDeuxModel implements Periodable
 
     public static $rules = [
         'availability_id' => 'integer|required',
-        'availability_type' => 'model:Weapon|required',
+        'availability_type' => 'interface:Available|required',
         'from' => 'date_format:"Y-m-d"|required',
         'to' => 'date_format:"Y-m-d"|required',
     ];

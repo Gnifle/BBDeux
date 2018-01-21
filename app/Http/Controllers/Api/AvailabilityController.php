@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\CrudController;
+use App\Http\Controllers\Controller;
 use App\Models\Availability;
 use App\Services\PeriodService;
 use App\Transformers\AvailabilityTransformer;
@@ -35,12 +36,12 @@ class AvailabilityController extends Controller implements CrudController
         $validator = Validator::make($request->all(), Availability::$rules);
 
         if ($validator->fails()) {
-            throw new \InvalidArgumentException('Invalid arguments supplied for Availability');
+            return response()->json(['errors' => $validator->errors()->all()], 400);
         }
 
         $availability = Availability::create($request->all());
 
-        return fractal($availability, new AvailabilityTransformer)->respond();
+        return fractal($availability, new AvailabilityTransformer)->respond(201);
     }
 
     /**
