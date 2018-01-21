@@ -2,30 +2,31 @@
 
 namespace App\Providers;
 
-use App\Models\Availability;
-use App\Models\Character;
-use App\Models\CharacterClass;
-use App\Models\Currency;
-use App\Models\Price;
-use App\Models\Stat;
-use App\Models\User;
-use App\Models\Weapon;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use Validator;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        Relation::morphMap([
-            'availability' => Availability::class,
-            'character' => Character::class,
-            'class' => CharacterClass::class,
-            'currency' => Currency::class,
-            'price' => Price::class,
-            'stat' => Stat::class,
-            'user', User::class,
-            'weapon' => Weapon::class,
-        ]);
+        Validator::extendImplicit('class', function ($attribute, $value, $parameters, $validator) {
+            return class_exists($value);
+        });
+
+        Validator::extendImplicit('instanceof', function ($attribute, $value, $parameters, $validator) {
+            if (! $parameters || ! class_exists(array_get($parameters, 0, null))) {
+                throw new \InvalidArgumentException(
+                    "Invalid comparision class provided to instanceof:<class> validation"
+                );
+            }
+            return class_exists($value) && is_a(new $value, $parameters[0], true);
+        });
+
+        Validator::extendImplicit('model', function ($attribute, $value, $parameters, $validator) {
+            return $parameters && class_exists(array_get($parameters, 0, null)) ?
+                class_exists($value) && is_a(new $value, 'App\Models\\' . $parameters[0], true) :
+                class_exists($value) && new $value instanceof Model;
+        });
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasPrices;
+use App\Traits\HasStats;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -25,6 +27,9 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class CharacterClass extends Model
 {
+    use HasPrices,
+        HasStats;
+
     protected $guarded = [];
 
     public function character()
@@ -35,10 +40,5 @@ class CharacterClass extends Model
     public function weapons()
     {
         return $this->hasMany(Weapon::class, 'class_id');
-    }
-
-    public function stats()
-    {
-        return $this->morphMany(Stat::class, 'statable');
     }
 }

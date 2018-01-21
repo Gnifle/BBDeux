@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasMorphMapRelation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * Relationships:
  * @property-read Model $priceable
+ * @property-read Currency $currency
  *
  * Scopes:
  * @method Builder|static whereId(int $id)
@@ -34,15 +36,26 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-class Price extends Model
+class Price extends Model implements Periodable
 {
     public $timestamps = false;
 
     protected $guarded = [];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::observe(PeriodObserver::class);
+    }
+
     public function priceable()
     {
         return $this->morphTo();
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     /**
@@ -67,8 +80,21 @@ class Price extends Model
         return $query->whereNotNull('to');
     }
 
+    /**
+     * Whether the price is free, meaning either 0 or null
+     *
+     * @return bool
+     */
     public function getIsFreeAttribute()
     {
         return $this->amount === null || $this->amount === 0;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPeriodableRelationName()
+    {
+        return 'priceable';
     }
 }

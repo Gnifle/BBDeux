@@ -17,8 +17,8 @@ $factory->define(Price::class, function (Faker $faker) {
         'amount' => $currency->name === 'Gas' ?
             round($faker->numberBetween(0, 300), -1)
             : round($faker->numberBetween(1000, 1000000), -3),
-        'from' => $date->startOfMonth(),
-        'to' => $date->endOfMonth(),
+        'from' => $date->copy()->startOfMonth(),
+        'to' => $date->copy()->endOfMonth(),
     ];
 });
 
@@ -35,12 +35,19 @@ $factory->state(Price::class, 'indefinite', function () {
     ];
 });
 
+$factory->state(Price::class, 'active_month', function () {
+    return [
+        'from' => Carbon::now()->subMonth()->startOfMonth(),
+        'to' => Carbon::now()->addMonth()->endOfMonth(),
+    ];
+});
+
 $factory->state(Price::class, 'weapon', function () {
     /** @var Weapon $weapon */
     $weapon = factory(Weapon::class)->create();
 
     return [
         'priceable_id' => $weapon->id,
-        'priceable_type' => 'weapon',
+        'priceable_type' => Weapon::class,
     ];
 });

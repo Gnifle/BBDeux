@@ -120,16 +120,7 @@ trait HasPrices
      */
     public function getCurrentPriceAttribute()
     {
-        $now = Carbon::now();
-
-        return $this->prices()->whereNull('to')
-            ->where('from', '<=', $now)
-            ->firstOr(function () use ($now) {
-                return $this->prices()->whereNotNull('to')
-                    ->where('from', '<=', $now)
-                    ->where('to', '>=', $now)
-                    ->first();
-            });
+        return $this->priceAt(Carbon::now());
     }
 
     /**
@@ -137,6 +128,42 @@ trait HasPrices
      */
     public function getIsFreeAttribute()
     {
-        return $this->current_price ? $this->current_price->is_free : false;
+        return $this->freeAt(Carbon::now());
+    }
+
+    /**
+     * Retrieve item price at a given time.
+     *
+     * @param Carbon|null $when Defaults to Carbon::now()
+     *
+     * @return Price
+     */
+    public function priceAt(Carbon $when = null)
+    {
+        $when = $when ?: Carbon::now();
+
+        return $this->prices()->whereNull('to')
+            ->where('from', '<=', $when)
+            ->whereNull('to')
+            ->firstOr(function () use ($when) {
+                return $this->prices()->whereNotNull('to')
+                    ->where('from', '<=', $when)
+                    ->where('to', '>=', $when)
+                    ->first();
+            });
+    }
+
+    /**
+     * Determines whether the item was free at a given time
+     *
+     * @param Carbon|null $when
+     * @return bool
+     */
+    public function freeAt(Carbon $when = null)
+    {
+        $when = $when ?: Carbon::now();
+        $price = $this->priceAt($when);
+
+        return $price ? $price->is_free : false;
     }
 }

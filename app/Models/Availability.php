@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Abstracts\BBDeuxModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
@@ -28,11 +29,23 @@ use Carbon\Carbon;
  *
  * @mixin \Eloquent
  */
-class Availability extends Model
+class Availability extends BBDeuxModel implements Periodable
 {
     public $timestamps = false;
 
-    protected $guarded = [];
+    public static $rules = [
+        'availability_id' => 'integer|required',
+        'availability_type' => 'model:Weapon|required',
+        'from' => 'date_format:"Y-m-d"|required',
+        'to' => 'date_format:"Y-m-d"|required',
+    ];
+
+    protected $fillable = [
+        'availability_id',
+        'availability_type',
+        'from',
+        'to',
+    ];
 
     public function availability()
     {
@@ -59,5 +72,13 @@ class Availability extends Model
     public function scopeDefinite(Builder $query)
     {
         return $query->whereNotNull('to');
+    }
+
+    /**
+     * @return string
+     */
+    public function getPeriodableRelationName()
+    {
+        return 'availability';
     }
 }

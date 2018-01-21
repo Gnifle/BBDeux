@@ -78,7 +78,7 @@ class CharacterClassTest extends Testcase
 
         factory(Stat::class, $stat_count)->create([
             'statable_id' => $class->id,
-            'statable_type' => 'class',
+            'statable_type' => CharacterClass::class,
         ]);
 
         $this->assertCount($stat_count, $class->stats);
