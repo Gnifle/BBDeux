@@ -2,11 +2,20 @@
 
 namespace App\Services;
 
+use App\Exceptions\PeriodException;
+use App\Exceptions\PeriodOverlapException;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Periodable;
+use App\Contracts\Periodable;
 
 class PeriodService
 {
+    /**
+     * Validate a given Periodable
+     *
+     * @param Periodable $periodable
+     *
+     * @throws PeriodException
+     */
     public function validatePeriod(Periodable $periodable)
     {
         $this->ensureValidDates($periodable);
@@ -19,16 +28,20 @@ class PeriodService
      *
      * @param Periodable $periodable
      *
-     * @throws \InvalidArgumentException
+     * @throws PeriodException
      */
     public function ensureValidDates(Periodable $periodable)
     {
         if ($periodable->from === null) {
-            throw new \InvalidArgumentException('A period cannot have a from-value of null');
+            throw new PeriodException('A period cannot have a from-value of null', $periodable->from);
         }
 
         if ($periodable->to !== null && $periodable->from->gte($periodable->to)) {
-            throw new \InvalidArgumentException('A period\'s to-date cannot be before or equal to from-date');
+            throw new PeriodException(
+                'A period\'s to-date cannot be before or equal to from-date',
+                $periodable->from,
+                $periodable->to
+            );
         }
     }
 
@@ -36,13 +49,15 @@ class PeriodService
      * Checks for overlapping periods and handles any overlaps found, if any
      *
      * @param Periodable $periodable
+     *
+     * @throws PeriodOverlapException
      */
     public function checkForOverlappingPeriods(Periodable $periodable)
     {
-        $overlapping_periods = $this->overlappingPeriods($periodable);
+        $overlapping_periods = $this->findOverlappingPeriods($periodable);
 
         if ($overlapping_periods->exists()) {
-            $this->handlePeriodOverlap($overlapping_periods, $periodable);
+            throw new PeriodOverlapException($periodable, $overlapping_periods);
         }
     }
 
@@ -53,7 +68,7 @@ class PeriodService
      *
      * @return Builder
      */
-    public function overlappingPeriods(Periodable $periodable) : Builder
+    public function findOverlappingPeriods(Periodable $periodable) : Builder
     {
         $relation = $periodable->getPeriodableRelationName();
 
@@ -80,42 +95,5 @@ class PeriodService
         if ($periodable->{$relation} === null) {
             throw new \InvalidArgumentException("Period does not have a valid, existing relation '{$relation}'");
         }
-    }
-
-    /**
-     * Throws an error with a relevant message depending on the number of overlapping periods found
-     *
-     * @param Builder $periods
-     * @param Periodable $periodable
-     *
-     * @throws \InvalidArgumentException
-     */
-    protected function handlePeriodOverlap(Builder $periods, Periodable $periodable) : void
-    {
-        if ($periods->count() === 1) {
-            /** @var Periodable $overlapping_period */
-            $overlapping_period = $periods->first();
-            throw new \InvalidArgumentException(sprintf(
-                'Period from %s to %s overlaps another period for %s with ID %d, where period from %s to %s',
-                $periodable->from->toDateTimeString(),
-                $periodable->to === null ? 'indefinite' : $periodable->to->toDateTimeString(),
-                class_basename($overlapping_period),
-                $overlapping_period->id,
-                $overlapping_period->from,
-                $overlapping_period->to
-            ));
-        }
-
-        /** @var Periodable $period */
-        $periods = $periods->get();
-
-        throw new \InvalidArgumentException(sprintf(
-            'Period from %s to %s overlaps with multiple other periods for %s with ID %d. Overlap ID\'s: [%s]',
-            $periodable->from->toDateTimeString(),
-            $periodable->to === null ? 'indefinite' : $periodable->to->toDateTimeString(),
-            class_basename($periods->first()),
-            $periods->first()->id,
-            $periods->implode('id', ', ')
-        ));
     }
 }

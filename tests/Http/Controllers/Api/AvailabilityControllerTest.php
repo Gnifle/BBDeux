@@ -58,11 +58,29 @@ class CharacterTest extends Testcase
             ->assertStatus(400)
             ->json();
 
-        $this->assertContains('Given model does not implement given interface', $response['errors'][0]);
+        $this->assertTrue(
+            in_array('Given model does not implement given interface', $response['errors'])
+        );
 
         $this->assertDatabaseMissing(
             model_table(Availability::class),
             $availability_data
         );
+    }
+
+    public function testStoreFailValidationInvalidPeriod()
+    {
+        /** @var Weapon $weapon */
+        $weapon = factory(Weapon::class)->create();
+
+        $availability_data = [
+            'availability_id' => $weapon->id,
+            'availability_type' => Weapon::class,
+            'from' => '2018-02-01',
+            'to' => '2018-01-01',
+        ];
+
+        $this->json('POST', 'api/availability', $availability_data)
+            ->assertStatus(400);
     }
 }

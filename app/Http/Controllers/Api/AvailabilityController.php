@@ -33,14 +33,14 @@ class AvailabilityController extends Controller implements CrudController
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), Availability::$rules);
+        $validator = Validator::make($request->all(), Availability::$validation);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()->all()], 400);
         }
 
         $availability = Availability::create($request->all());
-
+        
         return fractal($availability, new AvailabilityTransformer)->respond(201);
     }
 
@@ -66,7 +66,7 @@ class AvailabilityController extends Controller implements CrudController
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), Availability::$rules);
+        $validator = Validator::make($request->all(), Availability::$validation);
 
         if ($validator->fails()) {
             throw new \InvalidArgumentException('Invalid arguments supplied for Availability');

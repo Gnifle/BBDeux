@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\PeriodService;
+use App\Contracts\Periodable;
 
 class PeriodObserver
 {
@@ -23,7 +24,7 @@ class PeriodObserver
      *
      * @param Periodable $periodable
      */
-    public function saving(Periodable $periodable) : void
+    public function saving(Periodable $periodable)
     {
         $this->period_service->validatePeriod($periodable);
     }

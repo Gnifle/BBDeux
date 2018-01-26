@@ -34,11 +34,16 @@ class Availability extends BBDeuxModel implements Periodable
 {
     public $timestamps = false;
 
-    public static $rules = [
+    public static $validation = [
         'availability_id' => 'integer|required',
         'availability_type' => 'interface:Available|required',
         'from' => 'date_format:"Y-m-d"|required',
         'to' => 'date_format:"Y-m-d"|required',
+    ];
+
+    protected $dates = [
+        'from',
+        'to'
     ];
 
     protected $fillable = [
@@ -47,6 +52,12 @@ class Availability extends BBDeuxModel implements Periodable
         'from',
         'to',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::observe(PeriodObserver::class);
+    }
 
     public function availability()
     {
