@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+/**
+ * @mixin \Eloquent
+ */
 class User extends Authenticatable
 {
     use Notifiable;
