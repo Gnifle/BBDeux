@@ -90,6 +90,6 @@ class AvailabilityController extends Controller
     {
         Availability::findOrFail($id)->delete();
 
-        return fractal()->respond(null, 204);
+        return response(null, 204);
     }
 }

@@ -146,7 +146,11 @@ class CharacterTest extends Testcase
             'to' => '2018-02-01',
         ]);
 
-        $this->json('DELETE', "api/availability/{$availability->id}");
+        $response = $this->json('DELETE', "api/availability/{$availability->id}");
+
+        $response->assertStatus(204);
+
+        $this->assertNull($availability->fresh());
 
         $this->assertDatabaseMissing(
             model_table(Availability::class),
