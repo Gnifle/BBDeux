@@ -35,8 +35,8 @@ class Availability extends BBDeuxModel implements Periodable
     public $timestamps = false;
 
     public static $validation = [
-        'availability_id' => 'integer|required',
-        'availability_type' => 'interface:Available|required',
+        'availability_id' => 'integer',
+        'availability_type' => 'interface:Available',
         'from' => 'date_format:"Y-m-d"|required',
         'to' => 'date_format:"Y-m-d"|required',
     ];

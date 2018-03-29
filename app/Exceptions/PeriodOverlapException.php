@@ -34,11 +34,9 @@ class PeriodOverlapException extends PeriodException
             $overlapping_period = $overlapping_periods->first();
 
             return sprintf(
-                'Period from %s to %s overlaps another period for %s with ID %d, where period from %s to %s',
+                'Period from %s to %s overlaps another period, where period from %s to %s',
                 $periodable->from->toDateTimeString(),
                 $periodable->to === null ? 'indefinite' : $periodable->to->toDateTimeString(),
-                class_basename($overlapping_period),
-                $overlapping_period->id,
                 $overlapping_period->from,
                 $overlapping_period->to
             );
@@ -47,13 +45,15 @@ class PeriodOverlapException extends PeriodException
         /** @var Periodable $period */
         $overlapping_periods = $overlapping_periods->get();
 
+        $overlapping_periods->each(function (Periodable $period) use (&$periods_from_to) {
+            $periods_from_to .= "\n[{$period->from->toDateTimeString()} to {$period->to->toDateTimeString()}]";
+        });
+
         return sprintf(
-            'Period from %s to %s overlaps with multiple other periods for %s with ID %d. Overlap ID\'s: [%s]',
+            "Period from %s to %s overlaps with multiple other periods:%s",
             $periodable->from->toDateTimeString(),
             $periodable->to === null ? 'indefinite' : $periodable->to->toDateTimeString(),
-            class_basename($overlapping_periods->first()),
-            $overlapping_periods->first()->id,
-            $overlapping_periods->implode('id', ', ')
+            $periods_from_to
         );
     }
 }

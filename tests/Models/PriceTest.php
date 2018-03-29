@@ -2,6 +2,7 @@
 
 namespace Tests\Models;
 
+use App\Exceptions\PeriodOverlapException;
 use App\Models\Price;
 use App\Models\Weapon;
 use Carbon\Carbon;
@@ -128,7 +129,7 @@ class PriceTest extends Testcase
         /** @var Weapon $weapon */
         $weapon = $existing_price->priceable;
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(PeriodOverlapException::class);
 
         factory(Price::class)->create([
             'from' => $from,

@@ -2,79 +2,69 @@
 
 namespace App\Libraries\ApiExceptionHandler;
 
+use App\Exceptions\PeriodException;
+use App\Exceptions\PeriodOverlapException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use \Exception;
 use \InvalidArgumentException;
 
 class Handler
 {
+    use HandlerTrait;
+
+    /** @var stdClass */
+    protected $response;
+
     /**
      * Map of fully qualified Exception class names and their respective handler
      * @var array
      */
     protected $exceptionHandlerMap = [
         InvalidArgumentException::class => 'invalidArgumentException',
+        ModelNotFoundException::class => 'modelNotFoundException',
+        PeriodException::class => 'periodException',
+        PeriodOverlapException::class => 'periodException',
     ];
-
-    /**
-     * Handle an API Exception
-     *
-     * @param Request $request
-     * @param Exception $exception
-     *
-     * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response
-     */
-    public function handle(Request $request, Exception $exception)
-    {
-        $method = $this->determineHandler($exception);
-
-        return $this->{$method}($request, $exception);
-    }
-
-    /**
-     * Retrieve the method name of the exception handler for a given Exception
-     *
-     * @param Exception $exception
-     *
-     * @return string
-     */
-    protected function determineHandler(Exception $exception)
-    {
-        return array_get($this->exceptionHandlerMap, get_class($exception), 'default');
-    }
 
     /**
      * Handle an InvalidArgumentException
      *
      * @param Request $request
-     * @param Exception $exception
+     * @param InvalidArgumentException $exception
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function invalidArgumentException(Request $request, Exception $exception)
+    protected function invalidArgumentException(Request $request, InvalidArgumentException $exception)
     {
-        return response()->json([], 400);
+        return $this->respond(400);
     }
 
     /**
-     * Fallback Exception handler, if no other handle mathod is defined for the given Exception
+     * Handles a ModelNotFoundException
      *
      * @param Request $request
-     * @param Exception $exception
+     * @param ModelNotFoundException $exception
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function default(Request $request, Exception $exception)
+    protected function modelNotFoundException(Request $request, ModelNotFoundException $exception)
     {
-        return response()->json([
-            'message' => "And unhandled error occurred with message: {$exception->getMessage()}",
-            'code' => $exception->getCode(),
-            'trace' => $exception->getTrace(),
-            'at' => "In {$exception->getFile()} on line {$exception->getLine()}",
-            'request' => [
-                'data' => $request->all(),
-                'user' => $request->user(),
-            ],
-        ], 500);
+        return $this->respond(404);
+    }
+
+    /**
+     * Handle a PeriodException
+     *
+     * @param Request $request
+     * @param PeriodException $exception
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function periodException(Request $request, PeriodException $exception)
+    {
+        $this->response->request['data']['from'] = $exception->getFrom();
+        $this->response->request['data']['to'] = $exception->getTo();
+
+        return $this->respond(400);
     }
 }

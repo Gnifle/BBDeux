@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Contracts\CrudController;
 use App\Http\Controllers\Controller;
 use App\Models\Availability;
 use App\Services\PeriodService;
@@ -11,7 +10,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Response;
 
-class AvailabilityController extends Controller implements CrudController
+class AvailabilityController extends Controller
 {
     /** @var PeriodService */
     protected $period_service;
@@ -60,11 +59,11 @@ class AvailabilityController extends Controller implements CrudController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param Availability $availability
      *
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Availability $availability)
     {
         $validator = Validator::make($request->all(), Availability::$validation);
 
@@ -73,11 +72,9 @@ class AvailabilityController extends Controller implements CrudController
         }
 
         /** @var Availability $availability */
-        $availability = tap(Availability::findOrFail($id), function (Availability $availability) use ($request) {
-            $availability->update($request->all());
-        });
+        $availability->update($request->all());
 
-        return fractal($availability->fresh(), new AvailabilityTransformer)->respond();
+        return fractal($availability->fresh(), new AvailabilityTransformer)->respond(204);
     }
 
     /**

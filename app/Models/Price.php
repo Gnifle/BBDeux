@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasMorphMapRelation;
+use App\Contracts\Periodable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon $from
  * @property Carbon $to
  *
- * Dynamin Properties:
+ * Dynamic Properties:
  * @property-read bool $is_free
  *
  * Relationships:
