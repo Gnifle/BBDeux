@@ -14,8 +14,8 @@ class CreateWeaponsTable extends Migration
             $table->string('title');
             $table->string('slug');
             $table->text('description')->nullable();
-            $table->timestamps();
             $table->softDeletes();
+            $table->timestamps();
         });
     }
 
