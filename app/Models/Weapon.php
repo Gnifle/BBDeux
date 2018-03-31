@@ -9,12 +9,17 @@ use App\Traits\HasPrices;
 use App\Traits\HasStats;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 /**
  * Columns:
  * @property int $id
  * @property int $class_id
  * @property string $title
+ * @property string $slugs
  * @property string $description
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -47,31 +52,50 @@ class Weapon extends BBDeuxModel implements Available
 {
     use HasAvailabilityPeriods,
         HasPrices,
-        HasStats;
+        HasStats,
+        HasSlug,
+        SoftDeletes;
 
     const PRIMARY = 'primary';
     const SECONDARY = 'secondary';
     const MELEE = 'melee';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'class_id',
+        'title',
+        'slug',
+        'description',
+    ];
 
-    public function class()
+    public function class() : BelongsTo
     {
         return $this->belongsTo(CharacterClass::class, 'class_id');
     }
 
-    public function scopePrimary(Builder $query)
+    public function scopePrimary(Builder $query) : Builder
     {
         return $query->where('type', self::PRIMARY);
     }
 
-    public function scopeSecondary(Builder $query)
+    public function scopeSecondary(Builder $query) : Builder
     {
         return $query->where('type', self::SECONDARY);
     }
 
-    public function scopeMelee(Builder $query)
+    public function scopeMelee(Builder $query) : Builder
     {
         return $query->where('type', self::MELEE);
+    }
+
+    public function getRouteKeyName() : string
+    {
+        return 'slug';
+    }
+
+    public function getSlugOptions() : SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
     }
 }

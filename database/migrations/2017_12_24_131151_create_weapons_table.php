@@ -12,8 +12,10 @@ class CreateWeaponsTable extends Migration
             $table->increments('id');
             $table->integer('class_id')->references('id')->on('character_class');
             $table->string('title');
+            $table->string('slug');
             $table->text('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
