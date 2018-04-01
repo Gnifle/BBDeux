@@ -5,17 +5,29 @@ jobs:
     docker:
       - image: circleci/php:7.1-node-browsers
       - image: circleci/mysql:5.7
-    working_directory: ~/laravel
+        environment:
+          - MYSQL_ROOT_PASSWORD=password
+          - MYSQL_DATABASE=mysql_testing
+          - MYSQL_HOST=127.0.0.1
+          - MYSQL_USER=bbdeux
+          - MYSQL_PASSWORD=password
+          - MYSQL_ROOT_HOST=%
+    working_directory: ~/bbdeux
     steps:
       - checkout
-      - run: sudo apt install -y libsqlite3-dev zlib1g-dev
-      - run: sudo docker-php-ext-install zip
-      - run: sudo composer self-update
+      - run:
+          name: Installing SQLite, ZLIB and PHP dependencies
+          command: sudo apt install -y zlib1g-dev ; sudo docker-php-ext-install zip pdo_mysql
+      - run:
+          name: Updating Composer
+          command: sudo composer self-update
       - restore_cache:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: composer install -n --prefer-dist
+      - run:
+          name: Installing Composer dependencies
+          command: composer install -n --prefer-dist
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
@@ -24,13 +36,16 @@ jobs:
           keys:
             - node-v1-{{ checksum "package.json" }}
             - node-v1-
-      - run: yarn install
+      - run:
+          name: Running YARN
+          command: yarn install
       - save_cache:
           key: node-v1-{{ checksum "package.json" }}
           paths:
             - node_modules
-      - run: touch storage/testing.sqlite
-      - run: php artisan migrate --env=testing --database=mysql_testing --force
-      - run: ./vendor/bin/codecept build
-      - run: ./vendor/bin/codecept run
-      - run: ./vendor/bin/phpunit
+      - run:
+          name: Migrating
+          command: php artisan migrate --env=testing --database=mysql_testing --force
+      - run:
+          name: Running tests
+          command: ./vendor/bin/phpunit
