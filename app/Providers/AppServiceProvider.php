@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Character;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Validator;
@@ -32,5 +33,9 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('interface', function ($attribute, $value, $parameters, $validator) {
             return $parameters ? is_a(new $value, 'App\Contracts\\' . $parameters[0], true) : false;
         }, 'Given model does not implement given interface');
+
+        Validator::extend('gender', function ($attribute, $value, $parameters, $validator) {
+            return in_array($value, Character::genders());
+        }, 'Invalid gender provided');
     }
 }

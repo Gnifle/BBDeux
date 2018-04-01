@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\PeriodService;
 use App\Models\Weapon;
+use Illuminate\Support\Facades\Validator;
 
 class WeaponController extends Controller
 {
@@ -29,7 +30,13 @@ class WeaponController extends Controller
 
     public function store(Request $request)
     {
-        // POST
+        $validator = Validator::make($request->all(), Weapon::$validation_required);
+
+        if ($validator->fails()) {
+            // Handle validation failure
+        }
+
+        return redirect('admin/weapons');
     }
 
     public function show(Weapon $weapon)

@@ -10,4 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 abstract class BBDeuxModel extends Model
 {
     public static $validation = [];
+
+    public static $validation_required = [];
 }

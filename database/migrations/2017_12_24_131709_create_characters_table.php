@@ -16,7 +16,9 @@ class CreateCharactersTable extends Migration
         Schema::create('characters', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('slug');
             $table->enum('gender', ['Male', 'Female', 'Unknown']);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
